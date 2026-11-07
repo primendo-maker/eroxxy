@@ -31,3 +31,14 @@ export async function sendProvocation(coupleId: string, senderId: string, text: 
   if (error) throw error;
   return data as HeatMessage;
 }
+
+
+export async function sendPhoto(coupleId: string, senderId: string, mediaPath: string) {
+  const { data, error } = await supa
+    .from("heat_messages")
+    .insert({ couple_id: coupleId, sender_id: senderId, type: "photo", media_url: mediaPath, is_one_view: true })
+    .select()
+    .single();
+  if (error) throw error;
+  return data as HeatMessage;
+}

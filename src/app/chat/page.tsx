@@ -6,11 +6,14 @@ import { useSession } from "@/hooks/useSession";
 import { useProfile } from "@/hooks/useProfile";
 import { useMessages } from "@/hooks/useMessages";
 import { usePartnerProfile } from "@/hooks/usePartnerProfile";
-import { sendText, sendProvocation } from "@/data/messages";
+import { sendText, sendProvocation, sendPhoto } from "@/data/messages";
+import { uploadPhoto } from "@/data/photos";
 import { setPersonaMode } from "@/data/profile";
 import { notifyPartner } from "@/data/push";
 import { MessageBubble } from "@/components/MessageBubble";
 import { ProvocationsSheet } from "@/components/ProvocationsSheet";
+import { PhotoViewer } from "@/components/PhotoViewer";
+import type { HeatMessage } from "@/core/types";
 
 export default function ChatPage() {
   const router = useRouter();
@@ -22,6 +25,9 @@ export default function ChatPage() {
   const [sending, setSending] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [myPersona, setMyPersona] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [viewingPhoto, setViewingPhoto] = useState<HeatMessage | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,9 +56,8 @@ export default function ChatPage() {
       await sendText(profile.couple_id, session.user.id, content);
       if (partner?.id) notifyPartner(partner.id, "🔥 Nova provocação", "Toque pra ver").catch(() => {});
       setInput("");
-    } catch (e: any) {
-      alert("Erro: " + (e.message || ""));
-    } finally { setSending(false); }
+    } catch (e: any) { alert("Erro: " + (e.message || "")); }
+    finally { setSending(false); }
   }
 
   async function handleProvocation(text: string) {
@@ -63,15 +68,28 @@ export default function ChatPage() {
     } catch (e: any) { alert("Erro: " + (e.message || "")); }
   }
 
+  async function handleFilePick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !profile?.couple_id || !session) return;
+    e.target.value = ""; // reset input pra permitir re-selecionar mesmo arquivo
+    setUploading(true);
+    try {
+      const path = await uploadPhoto(profile.couple_id, file);
+      await sendPhoto(profile.couple_id, session.user.id, path);
+      if (partner?.id) notifyPartner(partner.id, "📷 Nova foto", "Vida única — toque pra ver").catch(() => {});
+    } catch (err: any) { alert("Erro no upload: " + (err.message || "")); }
+    finally { setUploading(false); }
+  }
+
   if (sLoading || pLoading || !profile) return <main className="min-h-dvh flex items-center justify-center text-mist">...</main>;
 
   const partnerInPersona = Boolean(partner?.in_persona_mode);
   const partnerDisplayName = partnerInPersona && partner?.persona_name ? partner.persona_name : (partner?.nickname || "Seu par");
   const partnerFirst = (partnerDisplayName || "?")[0].toUpperCase();
+  const myName = profile.nickname || "Você";
 
   return (
     <main className="relative z-10 flex flex-col h-dvh">
-      {/* Header */}
       <header className={`px-4 py-3 border-b border-cream/5 flex items-center gap-3 bg-[color:var(--background)]/80 backdrop-blur transition ${partnerInPersona ? "shadow-[0_0_30px_-5px_rgba(255,59,107,0.4)]" : ""}`}>
         <Link href="/home" className="text-cream/70 text-xl px-1">‹</Link>
         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-cream transition ${
@@ -82,12 +100,8 @@ export default function ChatPage() {
           {partnerInPersona ? "🔥" : partnerFirst}
         </div>
         <div className="flex-1 min-w-0">
-          <p className={`font-medium text-sm truncate ${partnerInPersona ? "text-[color:var(--neon-pink)] font-display italic" : "text-cream"}`}>
-            {partnerDisplayName}
-          </p>
-          <p className="text-mist/60 text-[10px] uppercase tracking-wider">
-            {partnerInPersona ? "🔥 em personagem" : "online"}
-          </p>
+          <p className={`font-medium text-sm truncate ${partnerInPersona ? "text-[color:var(--neon-pink)] font-display italic" : "text-cream"}`}>{partnerDisplayName}</p>
+          <p className="text-mist/60 text-[10px] uppercase tracking-wider">{partnerInPersona ? "🔥 em personagem" : "online"}</p>
         </div>
         <button
           onClick={togglePersona}
@@ -96,40 +110,38 @@ export default function ChatPage() {
               ? "bg-[color:var(--neon-pink)] text-cream shadow-[0_0_14px_-2px_rgba(255,59,107,0.7)]"
               : "bg-surface-high text-mist border border-cream/10"
           }`}
-        >
-          {myPersona ? "🔥 ON" : "🔥 OFF"}
-        </button>
+        >{myPersona ? "🔥 ON" : "🔥 OFF"}</button>
       </header>
 
-      {/* Banner "em personagem" */}
       {myPersona && (
         <div className="px-4 py-2 bg-[color:var(--wine)]/30 border-b border-[color:var(--neon-pink)]/30 text-center">
           <p className="text-xs text-cream font-display italic">Você está em personagem 🔥</p>
         </div>
       )}
 
-      {/* Mensagens */}
       <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
         {mLoading && <p className="text-center text-mist/50 text-sm">...</p>}
         {!mLoading && messages.length === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center text-center text-mist/60 py-16 gap-2">
             <p className="font-display italic text-2xl text-cream">Sem mensagens ainda</p>
-            <p className="text-sm">Comece com uma provocação rápida 🔥</p>
+            <p className="text-sm">Comece com uma provocação 🔥 ou uma foto 📷</p>
           </div>
         )}
         {messages.map(m => (
-          <MessageBubble key={m.id} msg={m} isMine={m.sender_id === session?.user.id} />
+          <MessageBubble key={m.id} msg={m} isMine={m.sender_id === session?.user.id} onPhotoClick={setViewingPhoto} />
         ))}
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
       <div className={`px-3 py-3 border-t border-cream/5 bg-[color:var(--background)]/90 backdrop-blur flex items-center gap-2 transition ${myPersona ? "shadow-[0_-10px_30px_-10px_rgba(255,59,107,0.5)]" : ""}`}>
+        <button onClick={() => setSheetOpen(true)} className="w-11 h-11 rounded-full bg-surface-high flex items-center justify-center text-lg active:scale-95 transition" aria-label="Provocações">🔥</button>
         <button
-          onClick={() => setSheetOpen(true)}
-          className="w-11 h-11 rounded-full bg-surface-high flex items-center justify-center text-lg active:scale-95 transition"
-          aria-label="Provocações rápidas"
-        >🔥</button>
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          className="w-11 h-11 rounded-full bg-surface-high flex items-center justify-center text-lg active:scale-95 transition disabled:opacity-50"
+          aria-label="Foto vida única"
+        >{uploading ? "..." : "📷"}</button>
+        <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleFilePick} className="hidden" />
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
@@ -137,15 +149,11 @@ export default function ChatPage() {
           placeholder={myPersona ? "Em personagem... 🔥" : "Escreva algo picante..."}
           className="flex-1 h-11 px-4 rounded-full bg-surface border border-cream/10 text-cream text-sm placeholder-mist/40 focus:outline-none focus:border-[color:var(--neon-pink)]/60"
         />
-        <button
-          onClick={handleSend}
-          disabled={sending || !input.trim()}
-          className="w-11 h-11 rounded-full bg-gradient-to-br from-[color:var(--wine)] to-[color:var(--neon-pink)] text-cream flex items-center justify-center disabled:opacity-40 active:scale-95 transition"
-          aria-label="Enviar"
-        >↑</button>
+        <button onClick={handleSend} disabled={sending || !input.trim()} className="w-11 h-11 rounded-full bg-gradient-to-br from-[color:var(--wine)] to-[color:var(--neon-pink)] text-cream flex items-center justify-center disabled:opacity-40 active:scale-95 transition" aria-label="Enviar">↑</button>
       </div>
 
       <ProvocationsSheet open={sheetOpen} onClose={() => setSheetOpen(false)} onPick={handleProvocation} />
+      {viewingPhoto && <PhotoViewer msg={viewingPhoto} isMine={viewingPhoto.sender_id === session?.user.id} viewerName={myName} onClose={() => setViewingPhoto(null)} />}
     </main>
   );
 }
