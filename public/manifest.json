@@ -1,0 +1,25 @@
+{
+  "name": "Eroxxy — O canal secreto do casal",
+  "short_name": "Eroxxy",
+  "description": "Apimente seu relacionamento com provocações, desafios e o lado mais sensual.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A0507",
+  "theme_color": "#0A0507",
+  "categories": ["lifestyle", "social"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
