@@ -1,59 +1,136 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0A0507;
+  --background: #05010A;
   --foreground: #F5E6D3;
+  --night: #05010A;
+  --surface: #120616;
+  --surface-high: #1F0B2A;
   --wine: #8B0E26;
-  --neon-pink: #FF3B6B;
+  --wine-deep: #4A0612;
+  --purple: #6D28D9;
+  --purple-deep: #4C1D95;
+  --purple-glow: #A855F7;
+  --neon-pink: #FF2D6F;
   --neon-pink-soft: #FF7A99;
   --ember: #FF6B35;
+  --gold: #F5C94C;
+  --gold-deep: #B88A1E;
   --cream: #F5E6D3;
-  --mist: #C9A98E;
-  --surface: #1A0A0E;
-  --surface-high: #2A1218;
-  --gold: #D4AF37;
+  --mist: #D4B8A0;
+  --smoke: #8A6F60;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-night: var(--night);
+  --color-surface: var(--surface);
+  --color-surface-high: var(--surface-high);
   --color-wine: var(--wine);
+  --color-wine-deep: var(--wine-deep);
+  --color-purple: var(--purple);
+  --color-purple-deep: var(--purple-deep);
+  --color-purple-glow: var(--purple-glow);
   --color-neon: var(--neon-pink);
   --color-neon-soft: var(--neon-pink-soft);
   --color-ember: var(--ember);
+  --color-gold: var(--gold);
+  --color-gold-deep: var(--gold-deep);
   --color-cream: var(--cream);
   --color-mist: var(--mist);
-  --color-surface: var(--surface);
-  --color-surface-high: var(--surface-high);
-  --color-gold: var(--gold);
+  --color-smoke: var(--smoke);
   --font-display: var(--font-playfair);
   --font-sans: var(--font-inter);
+  --font-mono: var(--font-mono);
 }
 
-/* Grain texture overlay */
+/* MESH animated background */
 body::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 40% 50% at 20% 10%, rgba(139, 14, 38, 0.55), transparent 60%),
+    radial-gradient(ellipse 50% 60% at 80% 85%, rgba(76, 29, 149, 0.5), transparent 60%),
+    radial-gradient(ellipse 30% 40% at 90% 15%, rgba(255, 45, 111, 0.35), transparent 60%),
+    radial-gradient(ellipse 40% 30% at 15% 90%, rgba(245, 201, 76, 0.18), transparent 70%);
+  filter: blur(40px);
+  animation: meshMove 24s ease-in-out infinite alternate;
+}
+
+/* Grain texture */
+body::after {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 1;
-  opacity: 0.04;
+  opacity: 0.05;
   mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.7'/></svg>");
+}
+
+@keyframes meshMove {
+  0% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(3%, -2%) scale(1.05); }
+  100% { transform: translate(-2%, 2%) scale(1); }
 }
 
 body {
-  background: 
-    radial-gradient(ellipse at top, #2A0A14 0%, transparent 60%),
-    radial-gradient(ellipse at bottom, #1A0A0E 0%, transparent 60%),
-    var(--background);
+  background: var(--night);
   color: var(--foreground);
   font-family: var(--font-inter), system-ui, sans-serif;
   min-height: 100dvh;
   overflow-x: hidden;
 }
 
-/* Scrollbar discreta */
+/* Utility: hero text with neon glow */
+.text-glow {
+  text-shadow:
+    0 0 20px rgba(255, 45, 111, 0.6),
+    0 0 40px rgba(255, 45, 111, 0.3);
+}
+
+.text-glow-gold {
+  text-shadow:
+    0 0 20px rgba(245, 201, 76, 0.5),
+    0 0 40px rgba(245, 201, 76, 0.2);
+}
+
+/* Glass card */
+.glass {
+  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 45, 111, 0.15);
+}
+
+/* Shimmer border */
+.border-neon {
+  position: relative;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(135deg, var(--neon-pink), var(--purple), var(--gold)) border-box;
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--surface-high); border-radius: 3px; }
+
+/* Pulse neon */
+@keyframes pulseNeon {
+  0%, 100% { box-shadow: 0 0 20px -5px var(--neon-pink), 0 0 40px -10px var(--neon-pink); }
+  50% { box-shadow: 0 0 40px -5px var(--neon-pink), 0 0 80px -10px var(--neon-pink); }
+}
+.pulse-neon { animation: pulseNeon 2s ease-in-out infinite; }
+
+/* Flame flicker */
+@keyframes flicker {
+  0%, 100% { opacity: 1; transform: scale(1) rotate(-1deg); }
+  50% { opacity: 0.85; transform: scale(1.05) rotate(2deg); }
+}
+.flicker { animation: flicker 1.8s ease-in-out infinite; transform-origin: bottom; }
