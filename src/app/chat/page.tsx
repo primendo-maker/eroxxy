@@ -6,6 +6,7 @@ import { useSession } from "@/hooks/useSession";
 import { useProfile } from "@/hooks/useProfile";
 import { useMessages } from "@/hooks/useMessages";
 import { sendText, sendProvocation } from "@/data/messages";
+import { notifyPartner } from "@/data/push";
 import { getCoupleMembers } from "@/data/couples";
 import { MessageBubble } from "@/components/MessageBubble";
 import { ProvocationsSheet } from "@/components/ProvocationsSheet";
@@ -41,7 +42,9 @@ export default function ChatPage() {
     if (!input.trim() || !profile?.couple_id || !session) return;
     setSending(true);
     try {
-      await sendText(profile.couple_id, session.user.id, input.trim());
+      const content = input.trim();
+      await sendText(profile.couple_id, session.user.id, content);
+      if (partner?.id) notifyPartner(partner.id, "🔥 Nova provocação", "Toque pra ver").catch(() => {});
       setInput("");
     } catch (e: any) {
       alert("Erro: " + (e.message || ""));
@@ -52,6 +55,7 @@ export default function ChatPage() {
     if (!profile?.couple_id || !session) return;
     try {
       await sendProvocation(profile.couple_id, session.user.id, text);
+      if (partner?.id) notifyPartner(partner.id, "🔥 Nova provocação", "Toque pra ver").catch(() => {});
     } catch (e: any) {
       alert("Erro: " + (e.message || ""));
     }

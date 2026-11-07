@@ -7,6 +7,7 @@ import { getProfile, signOut } from "@/data/auth";
 import { getCoupleMembers, getCouple } from "@/data/couples";
 import { listMessages } from "@/data/messages";
 import type { Profile, HeatMessage, Couple } from "@/core/types";
+import { PushActivator } from "@/components/PushActivator";
 
 export default function HomePage() {
   const router = useRouter();
@@ -76,6 +77,8 @@ export default function HomePage() {
           <p className="text-2xl font-semibold text-cream">{couple?.couple_xp ?? 0}</p>
         </div>
       </div>
+
+      <PushActivator />
 
       <Link
         href="/chat"
