@@ -19,7 +19,6 @@ export function useMessages(coupleId: string | null) {
       } finally { if (!cancel) setLoading(false); }
     })();
 
-    // Realtime subscribe
     const ch = supa
       .channel(`heat_msgs_${coupleId}`)
       .on("postgres_changes", {
@@ -28,10 +27,15 @@ export function useMessages(coupleId: string | null) {
         table: "heat_messages",
         filter: `couple_id=eq.${coupleId}`,
       }, (payload: any) => {
-        setMessages(prev => {
-          if (prev.some(m => m.id === payload.new.id)) return prev;
-          return [...prev, payload.new as HeatMessage];
-        });
+        setMessages(prev => prev.some(m => m.id === payload.new.id) ? prev : [...prev, payload.new as HeatMessage]);
+      })
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "heat_messages",
+        filter: `couple_id=eq.${coupleId}`,
+      }, (payload: any) => {
+        setMessages(prev => prev.map(m => m.id === payload.new.id ? { ...m, ...payload.new } : m));
       })
       .subscribe();
     channelRef.current = ch;

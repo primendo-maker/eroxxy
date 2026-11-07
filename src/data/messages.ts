@@ -33,10 +33,10 @@ export async function sendProvocation(coupleId: string, senderId: string, text: 
 }
 
 
-export async function sendPhoto(coupleId: string, senderId: string, mediaPath: string) {
+export async function sendPhoto(coupleId: string, senderId: string, mediaPath: string, isOneView: boolean) {
   const { data, error } = await supa
     .from("heat_messages")
-    .insert({ couple_id: coupleId, sender_id: senderId, type: "photo", media_url: mediaPath, is_one_view: true })
+    .insert({ couple_id: coupleId, sender_id: senderId, type: "photo", media_url: mediaPath, is_one_view: isOneView })
     .select()
     .single();
   if (error) throw error;

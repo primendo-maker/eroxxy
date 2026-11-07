@@ -13,6 +13,7 @@ import { notifyPartner } from "@/data/push";
 import { MessageBubble } from "@/components/MessageBubble";
 import { ProvocationsSheet } from "@/components/ProvocationsSheet";
 import { PhotoViewer } from "@/components/PhotoViewer";
+import { PhotoModeSheet } from "@/components/PhotoModeSheet";
 import type { HeatMessage } from "@/core/types";
 
 export default function ChatPage() {
@@ -26,6 +27,8 @@ export default function ChatPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [myPersona, setMyPersona] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [photoModeSheetOpen, setPhotoModeSheetOpen] = useState(false);
+  const [pendingOneView, setPendingOneView] = useState(true);
   const [viewingPhoto, setViewingPhoto] = useState<HeatMessage | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -71,14 +74,20 @@ export default function ChatPage() {
   async function handleFilePick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !profile?.couple_id || !session) return;
-    e.target.value = ""; // reset input pra permitir re-selecionar mesmo arquivo
+    e.target.value = "";
     setUploading(true);
     try {
       const path = await uploadPhoto(profile.couple_id, file);
-      await sendPhoto(profile.couple_id, session.user.id, path);
-      if (partner?.id) notifyPartner(partner.id, "📷 Nova foto", "Vida única — toque pra ver").catch(() => {});
+      await sendPhoto(profile.couple_id, session.user.id, path, pendingOneView);
+      const bodyTxt = pendingOneView ? "Vida única 🔥 — toque pra ver" : "Nova foto — toque pra ver";
+      if (partner?.id) notifyPartner(partner.id, "📷 Nova foto", bodyTxt).catch(() => {});
     } catch (err: any) { alert("Erro no upload: " + (err.message || "")); }
     finally { setUploading(false); }
+  }
+
+  function handlePhotoMode(isOneView: boolean) {
+    setPendingOneView(isOneView);
+    setTimeout(() => fileRef.current?.click(), 100);
   }
 
   if (sLoading || pLoading || !profile) return <main className="min-h-dvh flex items-center justify-center text-mist">...</main>;
@@ -136,10 +145,10 @@ export default function ChatPage() {
       <div className={`px-3 py-3 border-t border-cream/5 bg-[color:var(--background)]/90 backdrop-blur flex items-center gap-2 transition ${myPersona ? "shadow-[0_-10px_30px_-10px_rgba(255,59,107,0.5)]" : ""}`}>
         <button onClick={() => setSheetOpen(true)} className="w-11 h-11 rounded-full bg-surface-high flex items-center justify-center text-lg active:scale-95 transition" aria-label="Provocações">🔥</button>
         <button
-          onClick={() => fileRef.current?.click()}
+          onClick={() => setPhotoModeSheetOpen(true)}
           disabled={uploading}
           className="w-11 h-11 rounded-full bg-surface-high flex items-center justify-center text-lg active:scale-95 transition disabled:opacity-50"
-          aria-label="Foto vida única"
+          aria-label="Foto"
         >{uploading ? "..." : "📷"}</button>
         <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleFilePick} className="hidden" />
         <input
@@ -153,6 +162,7 @@ export default function ChatPage() {
       </div>
 
       <ProvocationsSheet open={sheetOpen} onClose={() => setSheetOpen(false)} onPick={handleProvocation} />
+      <PhotoModeSheet open={photoModeSheetOpen} onClose={() => setPhotoModeSheetOpen(false)} onPick={handlePhotoMode} />
       {viewingPhoto && <PhotoViewer msg={viewingPhoto} isMine={viewingPhoto.sender_id === session?.user.id} viewerName={myName} onClose={() => setViewingPhoto(null)} />}
     </main>
   );
