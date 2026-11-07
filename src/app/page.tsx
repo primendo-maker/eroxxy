@@ -1,14 +1,14 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="relative z-10 flex flex-col min-h-dvh items-center justify-between px-6 py-12 overflow-hidden">
-      {/* Top: aviso 18+ */}
       <div className="w-full flex justify-center">
         <span className="text-[10px] uppercase tracking-[0.3em] text-mist/60 border border-mist/20 rounded-full px-3 py-1">
           +18 · Conteúdo adulto
         </span>
       </div>
 
-      {/* Center: logo + tagline */}
       <div className="flex flex-col items-center gap-8 text-center">
         <div className="relative">
           <h1 className="font-display italic text-7xl sm:text-8xl font-black leading-none tracking-tight">
@@ -29,23 +29,22 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Bottom: CTAs */}
       <div className="w-full max-w-sm flex flex-col gap-3">
-        <a
+        <Link
           href="/entrar"
           className="w-full h-14 flex items-center justify-center rounded-full bg-gradient-to-r from-[color:var(--wine)] to-[color:var(--neon-pink)] text-cream font-medium text-base shadow-[0_8px_32px_-8px_rgba(255,59,107,0.5)] active:scale-[0.98] transition-transform"
         >
           Começar
-        </a>
-        <a
+        </Link>
+        <Link
           href="/login"
           className="w-full h-14 flex items-center justify-center rounded-full border border-cream/20 text-cream/80 font-medium text-base active:scale-[0.98] transition-transform"
         >
           Já tenho conta
-        </a>
+        </Link>
         <p className="text-center text-[11px] text-mist/50 mt-3 leading-relaxed">
           Ao continuar, você confirma ter mais de 18 anos e aceita nossos<br/>
-          <a href="/termos" className="underline">termos</a> e <a href="/privacidade" className="underline">privacidade</a>.
+          <Link href="/termos" className="underline">termos</Link> e <Link href="/privacidade" className="underline">privacidade</Link>.
         </p>
       </div>
     </main>
