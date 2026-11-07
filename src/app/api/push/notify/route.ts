@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import webpush from "web-push";
+import * as webpush from "web-push";
 import { supaAdmin } from "@/data/supabase-admin";
 
-export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY!;
