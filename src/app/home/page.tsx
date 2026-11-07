@@ -57,7 +57,10 @@ export default function HomePage() {
           <span className="text-cream/70 text-sm">+</span>
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[color:var(--neon-pink)] to-[color:var(--wine)] flex items-center justify-center text-cream text-xs font-semibold">{partnerFirst}</div>
         </div>
-        <button onClick={handleLogout} className="text-xs text-mist/50 underline">Sair</button>
+        <div className="flex items-center gap-4">
+          <Link href="/perfil" className="text-xs text-mist/70 underline">Perfil</Link>
+          <button onClick={handleLogout} className="text-xs text-mist/50 underline">Sair</button>
+        </div>
       </div>
 
       <div className="mb-10">

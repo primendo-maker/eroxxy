@@ -19,6 +19,7 @@ export type Profile = {
   pin_hash: string | null;
   bio: string | null;
   intensity_pref: Intensity;
+  in_persona_mode: boolean;
   created_at: string;
 };
 
