@@ -8,6 +8,7 @@ import { updateProfile } from "@/data/profile";
 import { Input } from "@/components/Input";
 import { Button } from "@/components/Button";
 import type { Intensity } from "@/core/types";
+import { BottomNav } from "@/components/BottomNav";
 
 export default function PerfilPage() {
   const router = useRouter();
@@ -58,7 +59,7 @@ export default function PerfilPage() {
   ];
 
   return (
-    <main className="relative z-10 flex flex-col min-h-dvh px-5 py-8">
+    <main className="relative z-10 flex flex-col min-h-dvh px-5 py-8 pb-28">
       <div className="flex items-center gap-3 mb-6">
         <Link href="/home" className="text-cream/70 text-xl">‹</Link>
         <h1 className="font-display italic text-2xl text-cream">Seu perfil</h1>
@@ -117,6 +118,7 @@ export default function PerfilPage() {
 
         <Button type="submit" loading={saving}>{saved ? "Salvo ✓" : "Salvar"}</Button>
       </form>
+      <BottomNav />
     </main>
   );
 }
