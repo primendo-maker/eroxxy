@@ -21,7 +21,6 @@ export const metadata: Metadata = {
   title: "Eroxxy — O canal secreto do casal",
   description: "Apimente seu relacionamento com provocações, desafios e o lado mais sensual do casal. Para adultos +18.",
   manifest: "/manifest.json",
-  themeColor: "#0A0507",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
